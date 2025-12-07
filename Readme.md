@@ -11,3 +11,8 @@ faster-whisper 1.2.1
 sounddevice 0.5.3
 
 numpy 2.2.6
+
+vosk 0.3.45
+
+
+
