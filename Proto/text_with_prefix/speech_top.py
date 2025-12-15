@@ -1,5 +1,5 @@
-from wake_listener import WakeWordListener
-from command_listener import listen_for_command
+from Proto.text_with_prefix.wake_listener import WakeWordListener
+from Proto.text_with_prefix.command_listener import listen_for_command
 
 def main():
     wake = WakeWordListener()
