@@ -1,10 +1,11 @@
 #include <SPI.h>
 #include <mcp_can.h>
 
-MCP_CAN CAN(10);
+#define CAN_CS 10
 
-byte fan[2] = {1, 0};
-byte servo[2] = {1, 0};
+MCP_CAN CAN(CAN_CS);
+
+byte led[2];
 
 void setup()
 {
@@ -22,20 +23,14 @@ void loop()
   if (Serial.available())
   {
     char cmd = Serial.read();
-    int value = Serial.parseInt();
+    int en = Serial.parseInt();
+    int pwm = Serial.parseInt();
 
-    if (cmd == 'F')
+    if (cmd == 'L')
     {
-      value = constrain(value, 0, 255);
-      fan[1] = value;
-      CAN.sendMsgBuf(0x110, 0, 2, fan);
-    }
-
-    if (cmd == 'S')
-    {
-      value = constrain(value, 0, 180);
-      servo[1] = value;
-      CAN.sendMsgBuf(0x120, 0, 2, servo);
+      led[0] = constrain(en, 0, 1);
+      led[1] = constrain(pwm, 0, 255);
+      CAN.sendMsgBuf(0x130, 0, 2, led);
     }
 
     while (Serial.available())
