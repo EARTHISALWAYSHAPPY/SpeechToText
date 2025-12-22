@@ -10,11 +10,13 @@ long unsigned int canId;
 unsigned char canLen;
 unsigned char canBuf[8];
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
   pinMode(LED_PIN, OUTPUT);
-
-  while (CAN.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) != CAN_OK) {
+  Serial.println("Recive");
+  while (CAN.begin(MCP_ANY, CAN_125KBPS, MCP_8MHZ) != CAN_OK)
+  {
     delay(100);
   }
   CAN.setMode(MCP_NORMAL);
@@ -23,13 +25,16 @@ void setup() {
   CAN.init_Filt(0, 0, 0x130);
 }
 
-void loop() {
-  if (CAN.checkReceive() == CAN_MSGAVAIL) {
+void loop()
+{
+  if (CAN.checkReceive() == CAN_MSGAVAIL)
+  {
     CAN.readMsgBuf(&canId, &canLen, canBuf);
 
-    if (canId == 0x130 && canLen >= 2) {
+    if (canId == 0x130 && canLen >= 2)
+    {
       byte enable = canBuf[0];
-      byte pwm    = canBuf[1];
+      byte pwm = canBuf[1];
 
       if (enable)
         analogWrite(LED_PIN, pwm);
@@ -38,3 +43,9 @@ void loop() {
     }
   }
 }
+
+//HMI :  
+//    Window Status : 0x0A2
+//    Air Status : 0x092
+//Window : 0x0A1
+//Air : 0x091

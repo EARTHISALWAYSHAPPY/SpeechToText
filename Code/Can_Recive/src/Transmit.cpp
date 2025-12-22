@@ -6,12 +6,14 @@
 MCP_CAN CAN(CAN_CS);
 
 byte led[2];
+bool ledState = false;
+unsigned long lastTime = 0;
 
 void setup()
 {
   Serial.begin(9600);
-
-  while (CAN.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) != CAN_OK)
+  Serial.println("Transmit");
+  while (CAN.begin(MCP_ANY, CAN_125KBPS, MCP_8MHZ) != CAN_OK)
   {
     delay(100);
   }
@@ -20,20 +22,14 @@ void setup()
 
 void loop()
 {
-  if (Serial.available())
+  if (millis() - lastTime >= 2000)
   {
-    char cmd = Serial.read();
-    int en = Serial.parseInt();
-    int pwm = Serial.parseInt();
+    lastTime = millis();
+    ledState = !ledState;
 
-    if (cmd == 'L')
-    {
-      led[0] = constrain(en, 0, 1);
-      led[1] = constrain(pwm, 0, 255);
-      CAN.sendMsgBuf(0x130, 0, 2, led);
-    }
+    led[0] = ledState ? 1 : 0;
+    led[1] = ledState ? 255 : 0;
 
-    while (Serial.available())
-      Serial.read();
+    CAN.sendMsgBuf(0x130, 0, 2, led);
   }
 }
