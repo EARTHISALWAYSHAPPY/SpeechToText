@@ -1,0 +1,6 @@
+Can ID แต่ละ task
+HMI :
+     Window Status : 0x0A2
+     Air Status : 0x092
+Window : 0x0A1
+Air : 0x091
