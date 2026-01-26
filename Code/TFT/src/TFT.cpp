@@ -4,51 +4,63 @@
 
 TFT_eSPI tft;
 
-struct Box { int x,y,w,h; };
+struct Box
+{
+  int x, y, w, h;
+};
 
-Box winFL = {  24,  98,  80, 18 };
-Box winRL = {  24, 163,  80, 18 };
-Box winFR = { 216,  98,  80, 18 };
-Box winRR = { 216, 163,  80, 18 };
-Box air   = { 120,  85,  80, 21 };
-Box dome  = { 120, 130,  80, 21 };
+Box winFL = {24, 98, 80, 18};
+Box winRL = {24, 163, 80, 18};
+Box winFR = {216, 98, 80, 18};
+Box winRR = {216, 163, 80, 18};
+Box air = {120, 85, 80, 21};
+Box dome = {120, 130, 80, 21};
 
-uint8_t fl=75, rl=50, rr=100;
-bool fr_on=false, dome_on=true;
+uint8_t fl = 75, rl = 50, rr = 100;
+bool fr_on = false, dome_on = true;
 uint8_t temp = 25;
-int dirFL=1, dirRL=1, dirRR=-1;
+int dirFL = 1, dirRL = 1, dirRR = -1;
 
-uint32_t lastMs=0;
+uint32_t lastMs = 0;
 
-void drawBox(const Box& b, const String& txt, uint16_t col, uint16_t bg){
+void drawBox(const Box &b, const String &txt, uint16_t col, uint16_t bg)
+{
   tft.fillRect(b.x, b.y, b.w, b.h, bg);
   tft.drawRoundRect(b.x, b.y, b.w, b.h, 9, col);
   tft.setTextDatum(MC_DATUM);
   tft.setTextColor(col, bg);
   tft.setTextSize(1);
-  tft.drawString(txt, b.x + b.w/2, b.y + b.h/2);
+  tft.drawString(txt, b.x + b.w / 2, b.y + b.h / 2);
 }
 
-void simulate(){
-  fl = (uint8_t)constrain((int)fl + dirFL*5, 0, 100);
-  if(fl==100 || fl==0) dirFL *= -1;
+void simulate()
+{
+  fl = (uint8_t)constrain((int)fl + dirFL * 5, 0, 100);
+  if (fl == 100 || fl == 0)
+    dirFL *= -1;
 
-  rl = (uint8_t)constrain((int)rl + dirRL*4, 0, 100);
-  if(rl==100 || rl==0) dirRL *= -1;
+  rl = (uint8_t)constrain((int)rl + dirRL * 4, 0, 100);
+  if (rl == 100 || rl == 0)
+    dirRL *= -1;
 
-  rr = (uint8_t)constrain((int)rr + dirRR*6, 0, 100);
-  if(rr==100 || rr==0) dirRR *= -1;
+  rr = (uint8_t)constrain((int)rr + dirRR * 6, 0, 100);
+  if (rr == 100 || rr == 0)
+    dirRR *= -1;
 
-  static int t=0;
+  static int t = 0;
   t++;
-  if(t%4==0) fr_on = !fr_on;
-  if(t%3==0) dome_on = !dome_on;
+  if (t % 4 == 0)
+    fr_on = !fr_on;
+  if (t % 3 == 0)
+    dome_on = !dome_on;
 
   temp++;
-  if(temp > 28) temp = 22;
+  if (temp > 28)
+    temp = 22;
 }
 
-void setup(){
+void setup()
+{
   tft.init();
   tft.setRotation(1);
   tft.setSwapBytes(true);
@@ -58,27 +70,29 @@ void setup(){
   delay(3000);
   tft.pushImage(0, 0, FRAME_2_WIDTH, FRAME_2_HEIGHT, Frame_2);
 
-  drawBox(winFL, "ON:75%",  TFT_GREEN, TFT_BLACK);
-  drawBox(winFR, "OFF",     TFT_RED,   TFT_BLACK);
-  drawBox(winRL, "ON:50%",  TFT_GREEN, TFT_BLACK);
+  drawBox(winFL, "ON:75%", TFT_GREEN, TFT_BLACK);
+  drawBox(winFR, "OFF", TFT_RED, TFT_BLACK);
+  drawBox(winRL, "ON:50%", TFT_GREEN, TFT_BLACK);
   drawBox(winRR, "ON:100%", TFT_GREEN, TFT_BLACK);
-  drawBox(air,   "ON:25C",  TFT_GREEN, TFT_WHITE);
-  drawBox(dome,  "ON",      TFT_GREEN, TFT_WHITE);
+  drawBox(air, "ON:25C", TFT_GREEN, TFT_WHITE);
+  drawBox(dome, "ON", TFT_GREEN, TFT_WHITE);
 }
 
-void loop(){
-  if(millis() - lastMs >= 500){
+void loop()
+{
+  if (millis() - lastMs >= 500)
+  {
     lastMs += 500;
     simulate();
 
-    drawBox(winFL, "ON:"+String(fl)+"%", TFT_GREEN, TFT_BLACK);
-    drawBox(winRL, "ON:"+String(rl)+"%", TFT_GREEN, TFT_BLACK);
-    drawBox(winRR, "ON:"+String(rr)+"%", TFT_GREEN, TFT_BLACK);
+    drawBox(winFL, "ON:" + String(fl) + "%", TFT_GREEN, TFT_BLACK);
+    drawBox(winRL, "ON:" + String(rl) + "%", TFT_GREEN, TFT_BLACK);
+    drawBox(winRR, "ON:" + String(rr) + "%", TFT_GREEN, TFT_BLACK);
 
     drawBox(winFR, fr_on ? "ON:40%" : "OFF",
             fr_on ? TFT_GREEN : TFT_RED, TFT_BLACK);
 
-    drawBox(air,  "ON:"+String(temp)+"C", TFT_GREEN, TFT_WHITE);
+    drawBox(air, "ON:" + String(temp) + "C", TFT_GREEN, TFT_WHITE);
     drawBox(dome, dome_on ? "ON" : "OFF",
             dome_on ? TFT_GREEN : TFT_RED, TFT_WHITE);
   }
