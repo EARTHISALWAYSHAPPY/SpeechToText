@@ -1,5 +1,4 @@
 #include "CAN.h"
-#define CAN_CS 10
 
 #define TX_PIN 5
 #define RX_PIN 4
@@ -87,17 +86,17 @@ void Rx_Can(void *pv)
                 {
                     currentCarState.win_fl = target_level;
                     currentCarState.win_fr = target_level;
-                    currentCarState.win_rl = target_level;
-                    currentCarState.win_rr = target_level;
+                    currentCarState.win_bl = target_level;
+                    currentCarState.win_br = target_level;
                 }
                 else if (win_id == W_FL)
                     currentCarState.win_fl = target_level;
                 else if (win_id == W_FR)
                     currentCarState.win_fr = target_level;
-                else if (win_id == W_RL)
-                    currentCarState.win_rl = target_level;
-                else if (win_id == W_RR)
-                    currentCarState.win_rr = target_level;
+                else if (win_id == W_BL)
+                    currentCarState.win_bl = target_level;
+                else if (win_id == W_BR)
+                    currentCarState.win_br = target_level;
             }
 
             else if (message.identifier == ID_DOMELIGHT)

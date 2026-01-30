@@ -25,8 +25,8 @@
 #define W_ALL 0x00
 #define W_FL 0x01
 #define W_FR 0x02
-#define W_RL 0x03
-#define W_RR 0x04
+#define W_BL 0x03
+#define W_BR 0x04
 
 // Domelight
 #define DL_OPEN 0x01
@@ -42,8 +42,8 @@ struct CarData
     // Window
     uint8_t win_fl = 0;
     uint8_t win_fr = 0;
-    uint8_t win_rl = 0;
-    uint8_t win_rr = 0;
+    uint8_t win_bl = 0;
+    uint8_t win_br = 0;
 
     // Domelight
     uint8_t dl_status = false;
