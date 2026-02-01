@@ -71,8 +71,8 @@ void Rx_Can(void *pv)
                 uint8_t cmd = message.data[0];
                 uint8_t raw_byte1 = message.data[1];
 
-                uint8_t win_id = (raw_byte1 >> 4) & 0x0F; // 4 ตัวหน้า = ID
-                uint8_t pos_val = raw_byte1 & 0x0F;       // 4 ตัวหลัง = Position (0-15)
+                uint8_t win_id = (raw_byte1 >> 4) & 0x0F; // 4 bit frist = ID
+                uint8_t pos_val = raw_byte1 & 0x0F;       // 4 bit second = Position (0-15)
 
                 uint8_t target_level = 0;
                 if (cmd == WIN_OPEN)
