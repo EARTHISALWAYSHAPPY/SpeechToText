@@ -111,9 +111,6 @@ void Rx_Can(void *pv)
                 case DL_CLOSE:
                     currentCarState.dl_status = false;
                     break;
-                default:
-                    currentCarState.dl_status = currentCarState.dl_status;
-                    break;
                 }
             }
         }
