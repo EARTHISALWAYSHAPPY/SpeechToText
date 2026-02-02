@@ -1,13 +1,13 @@
 #include "CAN.h"
 
-#define TX_PIN 5
-#define RX_PIN 4
+#define TX_PIN 25
+#define RX_PIN 26
 
 void Can_init()
 {
     // Config
     twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT((gpio_num_t)TX_PIN, (gpio_num_t)RX_PIN, TWAI_MODE_NORMAL);
-    twai_timing_config_t t_config = TWAI_TIMING_CONFIG_500KBITS();
+    twai_timing_config_t t_config = TWAI_TIMING_CONFIG_125KBITS();
     twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
 
     if (twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK)
@@ -26,6 +26,27 @@ void Rx_Can(void *pv)
     twai_message_t message;
     for (;;)
     {
+        //////////////////// Debug /////////////////////////
+        ////////////////////////////////////////////////////
+        // if (twai_receive(&message, 1) == ESP_OK)
+        // {
+
+        //     Serial.print("Recv ID: 0x");
+        //     Serial.print(message.identifier, HEX);
+        //     Serial.print("\tLen: ");
+        //     Serial.print(message.data_length_code);
+        //     Serial.print("\tData: ");
+
+        //     for (int i = 0; i < message.data_length_code; i++)
+        //     {
+        //         if (message.data[i] < 0x10)
+        //             Serial.print("0");
+        //         Serial.print(message.data[i], HEX);
+        //         Serial.print(" ");
+        //     }
+        //     Serial.println();
+        // }
+        ////////////////////////////////////////////////////
         if (twai_receive(&message, portMAX_DELAY) == ESP_OK)
         {
             // CASE 1: AC ID 0x091
@@ -76,9 +97,9 @@ void Rx_Can(void *pv)
 
                 uint8_t target_level = 0;
                 if (cmd == WIN_OPEN)
-                    target_level = 15; // เปิดสุด
+                    target_level = 15;
                 else if (cmd == WIN_CLOSE)
-                    target_level = 0; // ปิดสุด
+                    target_level = 0;
                 else if (cmd == WIN_SET_POS)
                     target_level = pos_val;
 
