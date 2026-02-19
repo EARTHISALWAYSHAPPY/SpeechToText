@@ -5,7 +5,6 @@
 
 void Can_init()
 {
-    // Config
     twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT((gpio_num_t)TX_PIN, (gpio_num_t)RX_PIN, TWAI_MODE_NORMAL);
     twai_timing_config_t t_config = TWAI_TIMING_CONFIG_125KBITS();
     twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
@@ -13,7 +12,6 @@ void Can_init()
     if (twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK)
     {
         twai_start();
-        Serial.println("CAN Started");
     }
     else
     {
@@ -24,116 +22,54 @@ void Can_init()
 void Rx_Can(void *pv)
 {
     twai_message_t message;
+
     for (;;)
     {
-        //////////////////// Debug /////////////////////////
-        ////////////////////////////////////////////////////
-        // if (twai_receive(&message, 1) == ESP_OK)
-        // {
+        if (twai_receive(&message, portMAX_DELAY) != ESP_OK)
+            continue;
 
-        //     Serial.print("Recv ID: 0x");
-        //     Serial.print(message.identifier, HEX);
-        //     Serial.print("\tLen: ");
-        //     Serial.print(message.data_length_code);
-        //     Serial.print("\tData: ");
-
-        //     for (int i = 0; i < message.data_length_code; i++)
-        //     {
-        //         if (message.data[i] < 0x10)
-        //             Serial.print("0");
-        //         Serial.print(message.data[i], HEX);
-        //         Serial.print(" ");
-        //     }
-        //     Serial.println();
-        // }
-        ////////////////////////////////////////////////////
-        if (twai_receive(&message, portMAX_DELAY) == ESP_OK)
+        // Debug: ID 0x64 (Hex) คือ 100 (Dec)
+        Serial.printf("ID: 0x%03X | DLC: %d | Data: ", message.identifier, message.data_length_code);
+        for (int i = 0; i < message.data_length_code; i++)
         {
-            // CASE 1: AC ID 0x091
-            if (message.identifier == ID_HVAC)
+            Serial.printf("%02X ", message.data[i]);
+        }
+        Serial.println();
+
+        if (message.identifier == ID_HVAC && message.data_length_code == 8)
+        {
+            uint8_t cmd = message.data[0];
+            if (cmd == HVAC_CMD_SET)
             {
-                uint8_t cmd = message.data[0];
-                uint8_t val = message.data[1];
-
-                switch (cmd)
-                {
-                case HVAC_AC_ON:
-                    currentCarState.ac_status = true;
-                    break;
-                case HVAC_AC_OFF:
-                    currentCarState.ac_status = false;
-                    break;
-                case HVAC_SET_TEMP:
-                    currentCarState.temp = val;
-                    break;
-
-                case HVAC_TEMP_UP:
-                    if (currentCarState.temp < 30)
-                        currentCarState.temp += val;
-                    break;
-                case HVAC_TEMP_DOWN:
-                    if (currentCarState.temp > 16)
-                        currentCarState.temp -= val;
-                    break;
-
-                case HVAC_FAN_UP:
-                    if (currentCarState.fan_level < 7)
-                        currentCarState.fan_level++;
-                    break;
-                case HVAC_FAN_DOWN:
-                    if (currentCarState.fan_level > 0)
-                        currentCarState.fan_level--;
-                    break;
-                }
+                currentCarState.temp = message.data[1] - 40;
+                currentCarState.fan_level = message.data[2] & 0x0F;
+                currentCarState.ac_status = message.data[3] & HVAC_MODE_AC_ON;
+                currentCarState.auto_mode = message.data[3] & HVAC_MODE_AUTO;
+                currentCarState.defrost = message.data[3] & HVAC_MODE_DEFROST;
             }
-            // CASE 2: WINDOW ID 0x0A1
-            else if (message.identifier == ID_WINDOW)
+        }
+        else if (message.identifier == ID_WINDOW && message.data_length_code == 8)
+        {
+            uint8_t mask = message.data[0];
+            uint8_t pos = message.data[1]; // รับค่า 0x64 (100) มาตรงๆ
+            uint8_t cmd = message.data[3];
+
+            if (cmd == WINDOW_MOVE)
             {
-                uint8_t cmd = message.data[0];
-                uint8_t raw_byte1 = message.data[1];
-
-                uint8_t win_id = (raw_byte1 >> 4) & 0x0F; // 4 bit frist = ID
-                uint8_t pos_val = raw_byte1 & 0x0F;       // 4 bit second = Position (0-15)
-
-                uint8_t target_level = 0;
-                if (cmd == WIN_OPEN)
-                    target_level = 15;
-                else if (cmd == WIN_CLOSE)
-                    target_level = 0;
-                else if (cmd == WIN_SET_POS)
-                    target_level = pos_val;
-
-                if (win_id == W_ALL)
-                {
-                    currentCarState.win_fl = target_level;
-                    currentCarState.win_fr = target_level;
-                    currentCarState.win_bl = target_level;
-                    currentCarState.win_br = target_level;
-                }
-                else if (win_id == W_FL)
-                    currentCarState.win_fl = target_level;
-                else if (win_id == W_FR)
-                    currentCarState.win_fr = target_level;
-                else if (win_id == W_BL)
-                    currentCarState.win_bl = target_level;
-                else if (win_id == W_BR)
-                    currentCarState.win_br = target_level;
+                uint8_t scaled_pos = map(pos, 0x00, 0x64, 0, 15);
+                if (mask & WINDOW_FL)
+                    currentCarState.win_fl = scaled_pos;
+                if (mask & WINDOW_FR)
+                    currentCarState.win_fr = scaled_pos;
+                if (mask & WINDOW_RL)
+                    currentCarState.win_bl = scaled_pos;
+                if (mask & WINDOW_RR)
+                    currentCarState.win_br = scaled_pos;
             }
-
-            else if (message.identifier == ID_DOMELIGHT)
-            {
-                uint8_t cmd = message.data[0];
-
-                switch (cmd)
-                {
-                case DL_OPEN:
-                    currentCarState.dl_status = true;
-                    break;
-                case DL_CLOSE:
-                    currentCarState.dl_status = false;
-                    break;
-                }
-            }
+        }
+        else if (message.identifier == ID_DOMELIGHT)
+        {
+            currentCarState.dl_status = (message.data[0] == DL_OPEN);
         }
     }
 }
