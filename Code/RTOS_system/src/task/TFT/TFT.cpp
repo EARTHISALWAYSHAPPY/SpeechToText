@@ -33,30 +33,24 @@ void TFT_init()
 
 void Display(void *pv)
 {
-    uint32_t lastMs = 0;
     for (;;)
     {
-        if (millis() - lastMs >= 200)
-        {
-            lastMs = millis();
+        int fl_pct = (int)currentCarState.win_fl;
+        int fr_pct = (int)currentCarState.win_fr;
+        int bl_pct = (int)currentCarState.win_bl;
+        int br_pct = (int)currentCarState.win_br;
 
-            int fl_pct = (currentCarState.win_fl * 100) / 15;
-            int fr_pct = (currentCarState.win_fr * 100) / 15;
-            int bl_pct = (currentCarState.win_bl * 100) / 15;
-            int br_pct = (currentCarState.win_br * 100) / 15;
+        drawBox(winFL, "FL:" + String(fl_pct) + "%", TFT_GREEN, TFT_BLACK);
+        drawBox(winFR, "FR:" + String(fr_pct) + "%", TFT_GREEN, TFT_BLACK);
+        drawBox(winBL, "BL:" + String(bl_pct) + "%", TFT_GREEN, TFT_BLACK);
+        drawBox(winBR, "BR:" + String(br_pct) + "%", TFT_GREEN, TFT_BLACK);
 
-            drawBox(winFL, "FL:" + String(fl_pct) + "%", TFT_GREEN, TFT_BLACK);
-            drawBox(winFR, "FR:" + String(fr_pct) + "%", TFT_GREEN, TFT_BLACK);
-            drawBox(winBL, "BL:" + String(bl_pct) + "%", TFT_GREEN, TFT_BLACK);
-            drawBox(winBR, "BR:" + String(br_pct) + "%", TFT_GREEN, TFT_BLACK);
+        String ac_txt = currentCarState.ac_status ? "AC:ON" : "AC:OFF";
+        uint16_t ac_col = currentCarState.ac_status ? TFT_CYAN : TFT_DARKGREY;
 
-            String ac_txt = currentCarState.ac_status ? "AC:ON" : "AC:OFF";
-            uint16_t ac_col = currentCarState.ac_status ? TFT_CYAN : TFT_DARKGREY;
+        drawBox(air, ac_txt + " " + String(currentCarState.temp) + "C", ac_col, TFT_BLACK);
 
-            drawBox(air, ac_txt + " " + String(currentCarState.temp) + "C", ac_col, TFT_BLACK);
-
-            drawBox(dome, "LIGHT:" + String(currentCarState.dl_status), TFT_ORANGE, TFT_BLACK);
-        }
+        drawBox(dome, "LIGHT:" + String(currentCarState.dl_status), TFT_ORANGE, TFT_BLACK);
 
         vTaskDelay(pdMS_TO_TICKS(10));
     }

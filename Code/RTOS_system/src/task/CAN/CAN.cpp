@@ -56,15 +56,14 @@ void Rx_Can(void *pv)
 
             if (cmd == WINDOW_MOVE)
             {
-                uint8_t scaled_pos = map(pos, 0x00, 0x64, 0, 15);
                 if (mask & WINDOW_FL)
-                    currentCarState.win_fl = scaled_pos;
+                    currentCarState.win_fl = pos;
                 if (mask & WINDOW_FR)
-                    currentCarState.win_fr = scaled_pos;
+                    currentCarState.win_fr = pos;
                 if (mask & WINDOW_RL)
-                    currentCarState.win_bl = scaled_pos;
+                    currentCarState.win_bl = pos;
                 if (mask & WINDOW_RR)
-                    currentCarState.win_br = scaled_pos;
+                    currentCarState.win_br = pos;
             }
         }
         else if (message.identifier == ID_DOMELIGHT)
