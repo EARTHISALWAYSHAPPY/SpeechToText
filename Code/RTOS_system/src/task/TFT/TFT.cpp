@@ -33,6 +33,14 @@ void TFT_init()
 
 void Display(void *pv)
 {
+    int last_fl = -1;
+    int last_fr = -1;
+    int last_bl = -1;
+    int last_br = -1;
+    bool last_ac = false;
+    int last_temp = -1000;
+    int last_light = -1;
+
     for (;;)
     {
         int fl_pct = (int)currentCarState.win_fl;
@@ -40,19 +48,55 @@ void Display(void *pv)
         int bl_pct = (int)currentCarState.win_bl;
         int br_pct = (int)currentCarState.win_br;
 
-        drawBox(winFL, "FL:" + String(fl_pct) + "%", TFT_GREEN, TFT_BLACK);
-        drawBox(winFR, "FR:" + String(fr_pct) + "%", TFT_GREEN, TFT_BLACK);
-        drawBox(winBL, "BL:" + String(bl_pct) + "%", TFT_GREEN, TFT_BLACK);
-        drawBox(winBR, "BR:" + String(br_pct) + "%", TFT_GREEN, TFT_BLACK);
+        // ---------- WINDOW ----------
+        if (fl_pct != last_fl)
+        {
+            drawBox(winFL, "FL:" + String(fl_pct) + "%", TFT_GREEN, TFT_BLACK);
+            last_fl = fl_pct;
+        }
 
-        String ac_txt = currentCarState.ac_status ? "AC:ON" : "AC:OFF";
-        uint16_t ac_col = currentCarState.ac_status ? TFT_CYAN : TFT_DARKGREY;
+        if (fr_pct != last_fr)
+        {
+            drawBox(winFR, "FR:" + String(fr_pct) + "%", TFT_GREEN, TFT_BLACK);
+            last_fr = fr_pct;
+        }
 
-        drawBox(air, ac_txt + " " + String(currentCarState.temp) + "C", ac_col, TFT_BLACK);
+        if (bl_pct != last_bl)
+        {
+            drawBox(winBL, "BL:" + String(bl_pct) + "%", TFT_GREEN, TFT_BLACK);
+            last_bl = bl_pct;
+        }
 
-        drawBox(dome, "LIGHT:" + String(currentCarState.dl_status), TFT_ORANGE, TFT_BLACK);
+        if (br_pct != last_br)
+        {
+            drawBox(winBR, "BR:" + String(br_pct) + "%", TFT_GREEN, TFT_BLACK);
+            last_br = br_pct;
+        }
 
-        vTaskDelay(pdMS_TO_TICKS(10));
+        // ---------- AC ----------
+        if (currentCarState.ac_status != last_ac || 
+            currentCarState.temp != last_temp)
+        {
+            String ac_txt = currentCarState.ac_status ? "AC:ON" : "AC:OFF";
+            uint16_t ac_col = currentCarState.ac_status ? TFT_CYAN : TFT_DARKGREY;
+
+            drawBox(air, ac_txt + " " + String(currentCarState.temp) + "C",
+                    ac_col, TFT_BLACK);
+
+            last_ac = currentCarState.ac_status;
+            last_temp = currentCarState.temp;
+        }
+
+        // ---------- LIGHT ----------
+        if (currentCarState.dl_status != last_light)
+        {
+            drawBox(dome, "LIGHT:" + String(currentCarState.dl_status),
+                    TFT_ORANGE, TFT_BLACK);
+
+            last_light = currentCarState.dl_status;
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(50));  
     }
 }
 
