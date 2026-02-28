@@ -29,6 +29,7 @@ void TFT_init()
     tft.pushImage(0, 0, FRAME_1_WIDTH, FRAME_1_HEIGHT, Frame_1);
     delay(3000);
     tft.pushImage(0, 0, FRAME_2_WIDTH, FRAME_2_HEIGHT, Frame_2);
+    tft.pushImage(29,200, FAN_OFF_WIDTH, FAN_OFF_HEIGHT, fan_on);
 }
 
 void Display(void *pv)
@@ -74,14 +75,18 @@ void Display(void *pv)
         }
 
         // ---------- AC ----------
-        if (currentCarState.ac_status != last_ac || 
+        if (currentCarState.ac_status != last_ac ||
             currentCarState.temp != last_temp)
         {
-            String ac_txt = currentCarState.ac_status ? "AC:ON" : "AC:OFF";
-            uint16_t ac_col = currentCarState.ac_status ? TFT_CYAN : TFT_DARKGREY;
-
-            drawBox(air, ac_txt + " " + String(currentCarState.temp) + "C",
-                    ac_col, TFT_BLACK);
+            // String ac_txt = currentCarState.ac_status ? "AC:ON" : "AC:OFF";
+            if (currentCarState.ac_status == 1)
+            {
+                tft.pushImage(29, 200, FAN_ON_WIDTH, FAN_ON_HEIGHT, fan_on);
+            }
+            else
+            {
+                tft.pushImage(29,200, FAN_OFF_WIDTH, FAN_OFF_HEIGHT, fan_off);
+            }
 
             last_ac = currentCarState.ac_status;
             last_temp = currentCarState.temp;
@@ -96,7 +101,7 @@ void Display(void *pv)
             last_light = currentCarState.dl_status;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(50));  
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
 

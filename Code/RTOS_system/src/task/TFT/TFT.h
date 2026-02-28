@@ -3,6 +3,8 @@
 #include <TFT_eSPI.h>
 #include "gui/Frame_1.h"
 #include "gui/Frame_2.h"
+#include "gui/fan_on.h"
+#include "gui/fan_off.h"
 
 void TFT_init();
 void Display(void *pv);
