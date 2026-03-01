@@ -22,9 +22,8 @@ void drawBox(const Box &b, const String &txt, uint16_t col, uint16_t bg);
 
 void TFT_init()
 {
-
-    pinMode(OUTPUT, 5);
-    digitalWrite(5, LOW);
+    REG_WRITE(GPIO_ENABLE_REG, REG_READ(GPIO_ENABLE_REG) | (1 << 12) | (1 << 14));
+    REG_WRITE(GPIO_ENABLE1_REG, REG_READ(GPIO_ENABLE1_REG) | (1 << (32 - 32)) | (1 << (33 - 32)));
     tft.init();
     tft.setRotation(3);
     tft.setSwapBytes(true);
@@ -110,9 +109,13 @@ void Display(void *pv)
             {
             case true:
                 tft.pushImage(155, 97, LIGHT_ON_WIDTH, LIGHT_ON_HEIGHT, Light_on);
+                REG_WRITE(GPIO_OUT_W1TS_REG, (1 << 12) | (1 << 14));
+                REG_WRITE(GPIO_OUT1_W1TS_REG, (1 << (32 - 32)) | (1 << (33 - 32)));
                 break;
             default:
                 tft.pushImage(155, 97, LIGHT_OFF_WIDTH, LIGHT_OFF_HEIGHT, Light_off);
+                REG_WRITE(GPIO_OUT_W1TC_REG, (1 << 12) | (1 << 14));
+                REG_WRITE(GPIO_OUT1_W1TC_REG, (1 << (32 - 32)) | (1 << (33 - 32)));
                 break;
             }
 
