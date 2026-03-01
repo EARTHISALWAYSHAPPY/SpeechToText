@@ -5,6 +5,8 @@
 #include "gui/Frame_2.h"
 #include "gui/fan_on.h"
 #include "gui/fan_off.h"
+#include "gui/Light_off.h"
+#include "gui/Light_on.h"
 
 void TFT_init();
 void Display(void *pv);
