@@ -1,6 +1,9 @@
 #include "TFT.h"
 #include "../CAN/CAN.h"
 
+#define LED_MASK ((1 << 12) | (1 << 14))
+#define LED1_MASK ((1 << (32 - 32)) | (1 << (33 - 32)))
+
 TFT_eSPI tft;
 
 struct Box
@@ -22,8 +25,13 @@ void drawBox(const Box &b, const String &txt, uint16_t col, uint16_t bg);
 
 void TFT_init()
 {
+    PIN_FUNC_SELECT(IO_MUX_GPIO12_REG, PIN_FUNC_GPIO);
+    PIN_FUNC_SELECT(IO_MUX_GPIO14_REG, PIN_FUNC_GPIO);
+    PIN_FUNC_SELECT(IO_MUX_GPIO32_REG, PIN_FUNC_GPIO);
+    PIN_FUNC_SELECT(IO_MUX_GPIO33_REG, PIN_FUNC_GPIO);
     REG_WRITE(GPIO_ENABLE_REG, REG_READ(GPIO_ENABLE_REG) | (1 << 12) | (1 << 14));
     REG_WRITE(GPIO_ENABLE1_REG, REG_READ(GPIO_ENABLE1_REG) | (1 << (32 - 32)) | (1 << (33 - 32)));
+
     tft.init();
     tft.setRotation(3);
     tft.setSwapBytes(true);
@@ -81,10 +89,9 @@ void Display(void *pv)
         // }
 
         // ---------- AC ----------
-        if (currentCarState.ac_status != last_ac ||
-            currentCarState.temp != last_temp)
+        if (currentCarState.ac_status != last_ac || currentCarState.temp != last_temp)
         {
-            // String ac_txt = currentCarState.ac_status ? "AC:ON" : "AC:OFF";
+
             uint16_t ac_col = currentCarState.ac_status ? TFT_GREEN : TFT_RED;
             switch (currentCarState.ac_status)
             {
@@ -96,7 +103,7 @@ void Display(void *pv)
                 break;
             }
 
-            drawBox(customBox, String(currentCarState.temp) + "C", ac_col, TFT_BLACK);
+            drawBox(customBox, String(currentCarState.temp), ac_col, TFT_BLACK);
 
             last_ac = currentCarState.ac_status;
             last_temp = currentCarState.temp;
@@ -108,14 +115,17 @@ void Display(void *pv)
             switch (currentCarState.dl_status)
             {
             case true:
+
                 tft.pushImage(155, 97, LIGHT_ON_WIDTH, LIGHT_ON_HEIGHT, Light_on);
-                REG_WRITE(GPIO_OUT_W1TS_REG, (1 << 12) | (1 << 14));
-                REG_WRITE(GPIO_OUT1_W1TS_REG, (1 << (32 - 32)) | (1 << (33 - 32)));
+                REG_WRITE(GPIO_OUT_W1TS_REG, LED_MASK);
+                REG_WRITE(GPIO_OUT1_W1TS_REG, LED1_MASK);
                 break;
+
             default:
+
                 tft.pushImage(155, 97, LIGHT_OFF_WIDTH, LIGHT_OFF_HEIGHT, Light_off);
-                REG_WRITE(GPIO_OUT_W1TC_REG, (1 << 12) | (1 << 14));
-                REG_WRITE(GPIO_OUT1_W1TC_REG, (1 << (32 - 32)) | (1 << (33 - 32)));
+                REG_WRITE(GPIO_OUT_W1TC_REG, LED_MASK);
+                REG_WRITE(GPIO_OUT1_W1TC_REG, LED1_MASK);
                 break;
             }
 
