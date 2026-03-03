@@ -6,19 +6,15 @@
 
 TFT_eSPI tft;
 
-struct Box
-{
-    int x, y, w, h;
-};
-Box winFL = {24, 98, 80, 18};
-Box winBL = {24, 163, 80, 18};
-Box winFR = {216, 98, 80, 18};
-Box winBR = {216, 163, 80, 18};
-Box air = {70, 201, 81, 26}; // fix
+// Box winFL = {24, 98, 80, 18};
+// Box winBL = {24, 163, 80, 18};
+// Box winFR = {216, 98, 80, 18};
+// Box winBR = {216, 163, 80, 18};
+Box air = {70, 201, 81, 26}; 
 Box dome = {120, 130, 80, 21};
 
-// test
-Box customBox = {70, 201, 81, 26};
+// // test
+Box Box_Number_AC = {70, 201, 81, 26};
 
 void drawBox(const Box &b, const String &txt, uint16_t col, uint16_t bg);
 // void simulate();
@@ -55,6 +51,9 @@ void Display(void *pv)
     bool last_ac = false;
     int last_temp = -1000;
     int last_light = -1;
+
+    static int displayed_temp = 25;
+    static bool first_draw = true;
 
     for (;;)
     {
@@ -93,6 +92,7 @@ void Display(void *pv)
         {
 
             uint16_t ac_col = currentCarState.ac_status ? TFT_GREEN : TFT_RED;
+            
             switch (currentCarState.ac_status)
             {
             case 1:
@@ -103,7 +103,20 @@ void Display(void *pv)
                 break;
             }
 
-            drawBox(customBox, String(currentCarState.temp), ac_col, TFT_BLACK);
+            if (first_draw)
+            {
+                displayed_temp = currentCarState.temp; 
+                first_draw = false;
+            }
+            else
+            {
+                if (displayed_temp < currentCarState.temp)
+                    displayed_temp++;
+                else if (displayed_temp > currentCarState.temp)
+                    displayed_temp--;
+            }
+
+            drawBox(Box_Number_AC, String(displayed_temp) + " C", ac_col, TFT_BLACK);
 
             last_ac = currentCarState.ac_status;
             last_temp = currentCarState.temp;

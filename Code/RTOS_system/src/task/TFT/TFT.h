@@ -10,5 +10,11 @@
 #include "gui/Light_off.h"
 #include "gui/Light_on.h"
 
+struct Box
+{
+    int x, y, w, h;
+};
+
 void TFT_init();
 void Display(void *pv);
+void drawBox(const Box &b, const String &txt, uint16_t col, uint16_t bg);
