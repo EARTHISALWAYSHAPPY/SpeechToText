@@ -5,7 +5,7 @@
 /* ================= CAN IDs ================= */
 #define ID_HVAC 0x245
 #define ID_WINDOW 0x325
-#define ID_DOMELIGHT 0x0A2 // คงไว้ถ้ามีใช้
+#define ID_DOMELIGHT 0x420 // คงไว้ถ้ามีใช้
 
 /* ================= HVAC ================= */
 #define HVAC_CMD_SET 0x01
@@ -24,7 +24,7 @@
 
 /* ================= DOMELIGHT ================= */
 #define DL_OPEN 0x01
-#define DL_CLOSE 0x02
+#define DL_CLOSE 0x00
 
 /* ================= CAR STATE ================= */
 struct CarData

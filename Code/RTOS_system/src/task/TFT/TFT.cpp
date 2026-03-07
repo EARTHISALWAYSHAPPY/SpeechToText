@@ -67,6 +67,7 @@ void Display(void *pv)
         if (currentCarState.win_fl != last_fl || currentCarState.win_fr != last_fr || currentCarState.win_bl != last_bl || currentCarState.win_br != last_br ||
             disp_fl != last_fl || disp_fr != last_fr || disp_bl != last_bl || disp_br != last_br)
         {
+            uint8_t step = 5;
             last_fl = currentCarState.win_fl;
             last_fr = currentCarState.win_fr;
             last_bl = currentCarState.win_bl;
@@ -81,10 +82,6 @@ void Display(void *pv)
                 disp_fr = last_fr;
                 disp_bl = last_bl;
                 disp_br = last_br;
-                redraw_fl = true;
-                redraw_fr = true;
-                redraw_bl = true;
-                redraw_br = true;
                 first_draw_window = false;
             }
             else
@@ -92,39 +89,31 @@ void Display(void *pv)
                 // FL
                 if (disp_fl != last_fl)
                 {
-                    disp_fl += (disp_fl < last_fl) ? 1 : -1;
-                    redraw_fl = true;
+                    disp_fl += (disp_fl < last_fl) ? step : -step;
                 }
 
                 // FR
                 if (disp_fr != last_fr)
                 {
-                    disp_fr += (disp_fr < last_fr) ? 1 : -1;
-                     redraw_fr = true;
+                    disp_fr += (disp_fr < last_fr) ? step : -step;
                 }
 
                 // BL
                 if (disp_bl != last_bl)
                 {
-                    disp_bl += (disp_bl < last_bl) ? 1 : -1;
-                    redraw_bl = true;
+                    disp_bl += (disp_bl < last_bl) ? step : -step;
                 }
 
                 // BR
                 if (disp_br != last_br)
                 {
-                    disp_br += (disp_br < last_br) ? 1 : -1;
-                    redraw_br = true;
+                    disp_br += (disp_br < last_br) ? step : -step;
                 }
             }
-            if (redraw_fl)
-                drawWindowBar(winFL_bar, disp_fl);
-            if (redraw_fr)
-                drawWindowBar(winFR_bar, disp_fr);
-            if (redraw_bl)
-                drawWindowBar(winBL_bar, disp_bl);
-            if (redraw_br)
-                drawWindowBar(winBR_bar, disp_br);
+            drawWindowBar(winFL_bar, disp_fl);
+            drawWindowBar(winFR_bar, disp_fr);
+            drawWindowBar(winBL_bar, disp_bl);
+            drawWindowBar(winBR_bar, disp_br);
         }
 
         // ---------- AC ----------
@@ -185,7 +174,7 @@ void Display(void *pv)
             last_light = currentCarState.dl_status;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(150));
     }
 }
 
@@ -203,8 +192,15 @@ void drawWindowBar(const Box &b, int percent)
 {
     int bar = percent * b.h / 100;
 
-    uint16_t bg = (percent == 0) ? TFT_RED : TFT_GREEN;
-    tft.drawRoundRect(b.x, b.y, b.w, b.h, 3, bg);
+    uint16_t border = (percent == 0) ? TFT_RED : TFT_GREEN;
+
+    // clear
+    tft.fillRect(b.x, b.y, b.w, b.h, TFT_BLACK);
+
+    // bar
     if (bar > 0)
         tft.fillRect(b.x, b.y + (b.h - bar), b.w, bar, TFT_GREEN);
+
+    // border
+    tft.drawRoundRect(b.x, b.y, b.w, b.h, 3, border);
 }
